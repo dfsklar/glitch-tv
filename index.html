@@ -116,15 +116,35 @@ function onImageLoaded() {
 	$("#overlay").height(_ih);
 }
 
+function encode64(input) {
+	var output = "", i = 0, l = input.length,
+	    key = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=", 
+	    chr1, chr2, chr3, enc1, enc2, enc3, enc4;
+	while (i < l) {
+		chr1 = input.charCodeAt(i++);
+		chr2 = input.charCodeAt(i++);
+		chr3 = input.charCodeAt(i++);
+		enc1 = chr1 >> 2;
+		enc2 = ((chr1 & 3) << 4) | (chr2 >> 4);
+		enc3 = ((chr2 & 15) << 2) | (chr3 >> 6);
+		enc4 = chr3 & 63;
+		if (isNaN(chr2)) enc3 = enc4 = 64;
+		else if (isNaN(chr3)) enc4 = 64;
+		output = output + key.charAt(enc1) + key.charAt(enc2) + key.charAt(enc3) + key.charAt(enc4);
+	}
+	return output;
+}
+
 function glitchImage(){
 	if (!_imageLoaded) return;
 	//$("#debug").text("Glitching... ");
 	// $("#overlay").toggle();
 	//break into 2 functions to allow status text to update
 	setTimeout(function(){
-    var xyz = glitchImage2(_inputImage, _glitchAmount, _brightnessAmount, 10, _iw, _ih);
-    _context.putImageData(xyz, 0, 0); }
-             , 0);
+    var xyz = glitchImage2(_inputImage, 1.5, 8, 10, _iw, _ih);
+    var data_url = 'data:image/gif;base64,'+encode64(xyz);
+    $('#finalimg').attr('src', data_url);
+  });
 }
 </script>
 </head>
@@ -134,7 +154,7 @@ function glitchImage(){
 			<div id="container">
 				<h1>ImageGlitcher</h1>
 
-				<img id="finalimg" width="200" height="200">
+				<img id="finalimg"></img>
 				
 				<div id="wrapper">
 					<canvas id="canvas" class="framed" width="640" height="480"></canvas>	

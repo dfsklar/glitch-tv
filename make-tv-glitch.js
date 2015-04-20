@@ -6,13 +6,13 @@ function glitchImage2(_inputImage, _glitchAmount, _brightnessAmount, _frameCount
 
   var encoder = new GIFEncoder();  // Engine for creating an animated gif
   encoder.setRepeat(0); //0  -> loop forever
-  encoder.setDelay(500); //go to next frame every n milliseconds
+  encoder.setDelay(200); //go to next frame every n milliseconds
   encoder.start();
   encoder.setSize(_iw, _ih);
-  //for (var i = 0; i<_frameCount; i++) {
-  //}
-  var bmdFrame = glitchImageSingle(inputBMD, _glitchAmount, _brightnessAmount);
-  encoder.addFrame(bmdFrame.data, true);
+  for (var i = 0; i<_frameCount; i++) {
+    var bmdFrame = glitchImageSingle(inputBMD, _glitchAmount, _brightnessAmount);
+    encoder.addFrame(bmdFrame.data.data, true);
+  }
   encoder.finish();
   return encoder.stream().getData();
 }
