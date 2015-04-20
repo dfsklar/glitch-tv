@@ -10,7 +10,8 @@ function glitchImage2(_inputImage, _glitchAmount, _brightnessAmount, _frameCount
   encoder.start();
   encoder.setSize(_iw, _ih);
   for (var i = 0; i<_frameCount; i++) {
-    var bmdFrame = glitchImageSingle(inputBMD, _glitchAmount, _brightnessAmount);
+    var bright = _brightnessAmount + getRandFloat(-2, 4);
+    var bmdFrame = glitchImageSingle(inputBMD, _glitchAmount, bright);
     encoder.addFrame(bmdFrame.data.data, true);
   }
   encoder.finish();
@@ -114,6 +115,10 @@ function useScanlines(v) {
 
 function getRandInt(min, max) {
 	return (Math.floor(Math.random() * (max - min) + min));
+}
+
+function getRandFloat(min, max) {
+	return (Math.random() * (max - min) + min);
 }
 
 function getRandChannel() {
