@@ -11,91 +11,82 @@
 	<script type="text/javascript" src="http://www.airtightinteractive.com/demos/js/imageglitcher/js/bitmapdata/BitmapData.js"></script>
 	<script type="text/javascript" src="http://www.airtightinteractive.com/demos/js/imageglitcher/js/bitmapdata/filters/ColorMatrixFilter.js"></script>
 
-	<script type="text/javascript" src="make-anim-gif.js"></script>
+  <script type="text/javascript" src="LZWEncoder.js"></script>
+  <script type="text/javascript" src="NeuQuant.js"></script>
+  <script type="text/javascript" src="GIFEncoder.js"></script>
+
 	<script type="text/javascript" src="make-tv-glitch.js"></script>
 
 	<link href="http://www.airtightinteractive.com/demos/js/imageglitcher/css/style.css" rel="stylesheet" type="text/css">
 
 	<script>
 
-			/*
-			 * ImageGlitcher by Felix Turner - http://www.airtight.cc
-			 * Image processing via BitmapData.js - http://peternitsch.net/bitmapdata.js/
-			 */
+/*
+ * ImageGlitcher by Felix Turner - http://www.airtight.cc
+ * Image processing via BitmapData.js - http://peternitsch.net/bitmapdata.js/
+ */
 
-			 var _glitchAmount = 5;
-			 var _brightnessAmount = 5;
-			 var _canvas;
-			 var _context;
-			 var _inputImage;
-			 var _useScanLines = true;
-			 var _imageLoaded = false;
-			 var iw;
-			 var ih;
+var _glitchAmount = 5;
+var _brightnessAmount = 5;
+var _canvas;
+var _context;
+var _inputImage;
+var _useScanLines = true;
+var _imageLoaded = false;
+var iw;
+var ih;
 
-			//init
-			$(document).ready( function() {
+//init
+$(document).ready( function() {
 
-				$('#overlay').hide();
-				_canvas = document.getElementById("canvas");
-				_context = _canvas.getContext("2d");
+	$('#overlay').hide();
+	_canvas = document.getElementById("canvas");
+	_context = _canvas.getContext("2d");
 
-				$('.thumb').on('dragstart', function(event) { event.preventDefault(); });
+	$('.thumb').on('dragstart', function(event) { event.preventDefault(); });
 
-				//init buttons
-				$("#glitchImage").click( function() {
-					glitchImage();
-				});
-				$("#saveImage").click( function() {
-					//open canvas image in new tab 
-					window.open(document.getElementById("canvas").toDataURL());
-				});
-				$(".thumb").click( function() {
-					loadImage("img/" + this.id + ".jpg");
-				});
-				
-				//detect for filereader drag and drop support
-				if (typeof(FileReader) != "undefined"){
-					//image drag and drop
-					//Chrome and FireFox only
-					window.addEventListener('dragover', function(event){
-						event.preventDefault();
-					}, false);
-					
-					window.addEventListener('drop', function(event){
-						event.preventDefault();
-						
-						var file = event.dataTransfer.files[0];
-						var fileType = file.type;
-						if (!fileType.match(/image\/\w+/)) {
-							$("#debug").text("Only image files supported.");
-							return;
-						}
-						
-						var reader = new FileReader();
-						reader.onload = function(){
+	//init buttons
+	$("#glitchImage").click( function() {
+		glitchImage();
+	});
+	$("#saveImage").click( function() {
+		//open canvas image in new tab 
+		window.open(document.getElementById("canvas").toDataURL());
+	});
+	$(".thumb").click( function() {
+		loadImage("img/" + this.id + ".jpg");
+	});
+	
+	//detect for filereader drag and drop support
+	if (typeof(FileReader) != "undefined"){
+		//image drag and drop
+		//Chrome and FireFox only
+		window.addEventListener('dragover', function(event){
+			event.preventDefault();
+		}, false);
+		
 
-							_inputImage = new Image();
-							_inputImage.src = reader.result;
-							
-							_inputImage.onload = function(){
-								onImageLoaded();
-							};
-						};
-						reader.readAsDataURL(file);
-					}, false);
-					
-					//display drag message
-					_context.fillStyle = "#999;"
-					_context.font = "bold 40px sans-serif";
-					_context.textAlign = "center";
-					_context.shadowOffsetX = 1;
-					_context.shadowOffsetY = 1;
-					_context.shadowBlur    = 2;
-					_context.shadowColor   = 'rgba(255, 255, 255, 0.5)';
-					_context.fillText("Drop Image Here", _canvas.width/2, _canvas.height/2);
-				}
-			});
+		setTimeout(function(){
+			_inputImage = new Image();
+			_inputImage.src = "http://www.howbadcoulditbe.com/cors/https://41.media.tumblr.com/afa530eb5d3688db47b90b8844138a4e/tumblr_nmy240sZi61tk0k6oo3_250.jpg";
+      // CORS problems: "file:///users/dfsklar/Desktop/todd.png"
+      _inputImage.crossOrigin = "Anonymous";
+			_inputImage.onload = function(){
+				onImageLoaded();
+			};
+		}, 100);
+		
+		//display drag message
+		_context.fillStyle = "#999;"
+		_context.font = "bold 40px sans-serif";
+		_context.textAlign = "center";
+		_context.shadowOffsetX = 1;
+		_context.shadowOffsetY = 1;
+		_context.shadowBlur    = 2;
+		_context.shadowColor   = 'rgba(255, 255, 255, 0.5)';
+		_context.fillText("Drop Image Here", _canvas.width/2, _canvas.height/2);
+	}
+});
 
 function loadImage(url){
 	_inputImage = new Image();
@@ -109,7 +100,6 @@ function loadImage(url){
 }
 
 function onImageLoaded() {
-
 	_imageLoaded =  true;
 	_iw = _inputImage.width;
 	_ih = _inputImage.height;
@@ -117,39 +107,34 @@ function onImageLoaded() {
 	$("#canvas").attr('width', _iw);
 	$("#canvas").attr('height', _ih);
 
-					//draw to canvas
-					_context.drawImage(_inputImage, 0, 0);
-					$("#debug").text("Image Loaded");
+	//draw to canvas
+	_context.drawImage(_inputImage, 0, 0);
+	$("#debug").text("Image Loaded");
 
-					$("#overlay").css( "line-height", _ih + "px" );
-					$("#overlay").width(_iw);
-					$("#overlay").height(_ih);
-				}
+	$("#overlay").css( "line-height", _ih + "px" );
+	$("#overlay").width(_iw);
+	$("#overlay").height(_ih);
+}
 
-				function glitchImage(){
-					if (!_imageLoaded) return;
-					//$("#debug").text("Glitching... ");
-					// $("#overlay").toggle();
-				//break into 2 functions to allow status text to update
-				setTimeout(function(){
-            _context.putImageData(glitchImage2(_glitchAmount, _brightnessAmount).data, 0, 0); }, 0);
-			}
+function glitchImage(){
+	if (!_imageLoaded) return;
+	//$("#debug").text("Glitching... ");
+	// $("#overlay").toggle();
+	//break into 2 functions to allow status text to update
+	setTimeout(function(){
+    var xyz = glitchImage2(_inputImage, _glitchAmount, _brightnessAmount, 10, _iw, _ih);
+    _context.putImageData(xyz, 0, 0); }
+             , 0);
+}
+</script>
+</head>
 
 
-			</script>
-		</head>
-		<body>
+	<body>
 			<div id="container">
 				<h1>ImageGlitcher</h1>
-				<p>Use ImageGlitcher to glitch any image and save the result. Drag and Drop an image from the desktop, or click a sample image below.</p>
 
-				<img id="pearl" class="thumb" src="img/thumbs/pearl.jpg" width="80" height="80">
-				<img id="klf" class="thumb" src="img/thumbs/klf.jpg" width="80" height="80">
-				<img id="heade" class="thumb" src="img/thumbs/heade.jpg" width="80" height="80">
-				<img id="face" class="thumb" src="img/thumbs/face.jpg" width="80" height="80">
-				<img id="wargames" class="thumb" src="img/thumbs/wargames.jpg" width="80" height="80">
-				<img id="anderson" class="thumb" src="img/thumbs/anderson.jpg" width="80" height="80">     
-				<img id="paramount" class="thumb" src="img/thumbs/paramount.jpg" width="80" height="80">
+				<img id="finalimg" width="200" height="200">
 				
 				<div id="wrapper">
 					<canvas id="canvas" class="framed" width="640" height="480"></canvas>	

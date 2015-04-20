@@ -1,4 +1,26 @@
-function glitchImage2(_glitchAmount, _brightnessAmount) {
+"use strict";
+
+function glitchImage2(_inputImage, _glitchAmount, _brightnessAmount, _frameCount, _iw, _ih) {
+	var inputBMD = new BitmapData(_iw, _ih);
+	inputBMD.draw(_inputImage);
+
+  var encoder = new GIFEncoder();  // Engine for creating an animated gif
+  encoder.setRepeat(0); //0  -> loop forever
+  encoder.setDelay(500); //go to next frame every n milliseconds
+  encoder.start();
+  encoder.setSize(_iw, _ih);
+  //for (var i = 0; i<_frameCount; i++) {
+  //}
+  var bmdFrame = glitchImageSingle(inputBMD, _glitchAmount, _brightnessAmount);
+  encoder.addFrame(bmdFrame.data, true);
+  encoder.finish();
+  return encoder.stream().getData();
+}
+
+
+
+// Returns instance of outputBMD
+function glitchImageSingle(inputBMD, _glitchAmount, _brightnessAmount) {
 
   console.log("GLITCH IMAGE: ");
   console.log(_glitchAmount);
@@ -7,16 +29,13 @@ function glitchImage2(_glitchAmount, _brightnessAmount) {
 	var start = new Date().getTime();
 	
 	//draw input image to output canvas
-	outputBMD = new BitmapData(_iw, _ih);
+	var outputBMD = new BitmapData(_iw, _ih);
 	outputBMD.draw(_inputImage);
 	
-	//init inputBMD
-	inputBMD = new BitmapData(_iw, _ih);
-	inputBMD.draw(_inputImage);
 	var maxOffset = _glitchAmount * _glitchAmount / 100 * _iw;
 	
 	//randomly offset slices horizontally
-	for (i = 0; i < _glitchAmount * 2; i++) {
+	for (var i = 0; i < _glitchAmount * 2; i++) {
 
 		var startY = getRandInt(0, _ih);
 		var chunkHeight = getRandInt(1, _ih / 4);
@@ -54,8 +73,8 @@ function glitchImage2(_glitchAmount, _brightnessAmount) {
 		0, 0, 0, 1, 0
 	];
 	
-	zeroPoint = new Point();
-	brightnessFilter = new ColorMatrixFilter(brightMat);
+	var zeroPoint = new Point();
+	var brightnessFilter = new ColorMatrixFilter(brightMat);
 	outputBMD.applyFilter(outputBMD, outputBMD.rect, zeroPoint, brightnessFilter);
 
 	if (false) {
@@ -75,9 +94,9 @@ function glitchImage2(_glitchAmount, _brightnessAmount) {
 	// _context.putImageData(outputBMD.data, 0, 0);
 
 	//log time
-	var end = new Date().getTime();
-	$("#debug").text("Completed in  " + Math.round((end - start)/1000)  + " seconds");
-	$("#overlay").toggle();
+	//var end = new Date().getTime();
+	///$("#debug").text("Completed in  " + Math.round((end - start)/1000)  + " seconds");
+	///$("#overlay").toggle();
 };
 
 //handle range input
